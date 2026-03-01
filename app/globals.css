@@ -8,6 +8,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
   transition: background 0.5s ease;
+  min-height: 100vh;
 }
 
 .dark-mode {
@@ -31,11 +32,28 @@ body {
   -webkit-text-fill-color: transparent;
   background-size: 400% 400%;
   animation: rainbow 8s ease infinite;
+  line-height: 1.2;
+  padding: 0 10px;
 }
 
+/* Fix logo GenZee */
 .logo {
   display: inline-block;
-  animation: pulse 2s infinite;
+  background: linear-gradient(45deg, #ff00ff, #00ffff, #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  position: relative;
+  padding: 0 8px;
+}
+
+.logo::after {
+  content: '✨';
+  position: absolute;
+  right: -25px;
+  top: -10px;
+  font-size: 1.2rem;
+  animation: float 3s infinite ease-in-out;
 }
 
 .hero-subtitle {
@@ -49,11 +67,15 @@ body {
   color: #f0f0f0;
 }
 
-.hero-buttons {
+/* Fix button alignment */
+.hero-buttons, .section-buttons {
   display: flex;
   gap: 20px;
-  justify-content: center;
+  justify-content: center !important;
   flex-wrap: wrap;
+  margin: 30px auto !important;
+  max-width: 600px;
+  width: 100%;
 }
 
 .btn {
@@ -68,6 +90,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-width: 200px;
 }
 
 .btn:hover {
@@ -130,6 +153,8 @@ body {
 .section-content {
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  padding: 0 15px;
 }
 
 .section-title {
@@ -140,6 +165,7 @@ body {
   background: linear-gradient(45deg, #ff00ff, #00ffff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  line-height: 1.3;
 }
 
 .dark-mode .section-title {
@@ -439,6 +465,89 @@ body {
   animation: pulse 1s infinite;
 }
 
+/* Love Info Box (Fix "Here's how it works") */
+.love-info {
+  background: linear-gradient(135deg, rgba(255,105,180,0.15), rgba(105,180,255,0.15));
+  border: 2px dashed #ff69b4;
+  border-radius: 20px;
+  padding: 30px !important;
+  margin: 30px auto !important;
+  text-align: center !important;
+  max-width: 650px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.love-info::before {
+  content: '💖';
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  font-size: 45px;
+  opacity: 0.2;
+  transform: rotate(15deg);
+}
+
+.love-steps {
+  list-style: none;
+  padding: 0;
+  margin-top: 15px;
+}
+
+.love-steps li {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 14px 22px;
+  border-radius: 12px;
+  margin: 12px 0;
+  font-weight: 600;
+  color: #ff00ff;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  position: relative;
+  text-align: left;
+}
+
+.love-steps li::before {
+  content: '👉';
+  margin-right: 12px;
+  font-size: 1.2rem;
+}
+
+/* Fix Disclaimer Styling */
+.love-disclaimer {
+  background: linear-gradient(135deg, rgba(255,105,180,0.15), rgba(105,180,255,0.15));
+  border: 2px dashed #ff69b4;
+  border-radius: 20px;
+  padding: 28px !important;
+  margin: 35px auto !important;
+  text-align: center !important;
+  max-width: 680px !important;
+  font-size: 1.2rem !important;
+  line-height: 1.8 !important;
+  position: relative;
+  overflow: hidden;
+  color: #333;
+}
+
+.dark-mode .love-disclaimer {
+  color: #f0f0f0;
+  background: linear-gradient(135deg, rgba(255,105,180,0.1), rgba(105,180,255,0.1));
+}
+
+.love-disclaimer::before {
+  content: '💖';
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  font-size: 50px;
+  opacity: 0.25;
+  transform: rotate(15deg);
+}
+
+.love-disclaimer br {
+  display: block;
+  margin: 10px 0;
+}
+
 /* Promise List */
 .promise-list {
   list-style: none;
@@ -542,35 +651,60 @@ body {
   100% { background-position: 100% 50%; }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(10deg); }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 2.3rem !important;
+    line-height: 1.4;
   }
-
+  
+  .logo {
+    font-size: 2.4rem !important;
+    display: block !important;
+    margin: 10px auto !important;
+  }
+  
+  .logo::after {
+    right: -20px !important;
+    top: -8px !important;
+    font-size: 1rem !important;
+  }
+  
   .hero-subtitle {
     font-size: 1.2rem;
   }
-
-  .hero-buttons {
+  
+  .hero-buttons, .section-buttons {
     flex-direction: column;
     align-items: center;
+    gap: 15px !important;
   }
-
+  
   .btn {
-    width: 100%;
-    max-width: 300px;
+    width: 100% !important;
+    max-width: 320px !important;
+    min-width: auto !important;
   }
-
+  
   .section {
     padding: 60px 20px;
   }
-
+  
   .section-title {
     font-size: 2rem;
   }
-
+  
   .ai-cards, .love-tiers {
     grid-template-columns: 1fr;
+  }
+  
+  .love-disclaimer {
+    font-size: 1.1rem !important;
+    padding: 25px !important;
   }
 }
