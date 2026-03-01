@@ -1,31 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from './page.module.css';
+import './globals.css';
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [lovePoints, setLovePoints] = useState(0);
-  const [friendCount, setFriendCount] = useState(0); // Default 0
+  const [friendCount, setFriendCount] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [joke, setJoke] = useState('');
-  const [isClient, setIsClient] = useState(false); // Untuk pastikan di client
+  const [isClient, setIsClient] = useState(false);
 
-  // Pastikan kita di client side
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Generate random friend count hanya di client
   useEffect(() => {
     if (isClient) {
       setFriendCount(Math.floor(Math.random() * 1000) + 1);
     }
   }, [isClient]);
 
-  // Generate random joke hanya di client
   useEffect(() => {
     if (isClient) {
       const jokes = [
@@ -42,76 +39,68 @@ export default function Home() {
     }
   }, [isClient]);
 
-  // Auto-hide navbar after 10 seconds of inactivity
   useEffect(() => {
     const hideTimer = setTimeout(() => {
       setShowNavbar(false);
     }, 10000);
-
     return () => clearTimeout(hideTimer);
   }, [lastActivity]);
 
-  // Show navbar on scroll or mouse move
   useEffect(() => {
     const handleActivity = () => {
       setShowNavbar(true);
       setLastActivity(Date.now());
     };
-
     window.addEventListener('scroll', handleActivity);
     window.addEventListener('mousemove', handleActivity);
-
     return () => {
       window.removeEventListener('scroll', handleActivity);
       window.removeEventListener('mousemove', handleActivity);
     };
   }, []);
 
-  // Play sound function
   const playSound = (soundName) => {
     if (soundEnabled && isClient) {
       console.log(`Playing sound: ${soundName}`);
     }
   };
 
-  // Add love points
   const addLovePoints = () => {
     const points = Math.floor(Math.random() * 10) + 1;
     setLovePoints(prev => prev + points);
     playSound('boop');
   };
 
-  // Kalau belum di client, tampilkan loading
   if (!isClient) {
     return (
-      <div className={styles.loading}>
+      <div className="loading">
         <p>Loading GenZee...</p>
       </div>
     );
   }
 
   return (
-    <div className={`${styles.container} ${isDarkMode ? styles.darkMode : ''}`}>
+    <div className={`container ${isDarkMode ? 'dark-mode' : ''}`}>
       
       {/* Hero Section */}
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <h1 className={styles.heroTitle}>
-            ✨ Welcome to <span className={styles.logo}>GenZee</span>! ✨
+      <section className="hero">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            ✨ Welcome to <span className="logo">GenZee</span>! ✨
           </h1>
-          <p className={styles.heroSubtitle}>
+          <p className="hero-subtitle">
             Gen Z playground for viral videos & AI magic!
           </p>
           
-          <div className={styles.heroButtons}>
+          <div className="hero-buttons">
             <button 
-              className={`${styles.btn} ${styles.btnPrimary}`} 
+              className="btn btn-primary" 
               onClick={() => playSound('boop')}
             >
               🎮 Explore Now
             </button>
             <button 
-              className={`${styles.btn} ${styles.btnSecondary}`} 
+              className="btn btn-secondary" 
               onClick={() => playSound('boop')}
             >
               🤖 Try AI Generator
@@ -121,62 +110,62 @@ export default function Home() {
       </section>
 
       {/* What is GenZee */}
-      <section className={styles.section}>
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>🤔 What is GenZee?</h2>
-          <div className={styles.waveDivider}></div>
+      <section className="section">
+        <div className="section-content">
+          <h2 className="section-title">🤔 What is GenZee?</h2>
+          <div className="wave-divider"></div>
           
-          <p className={styles.sectionText}>
+          <p className="section-text">
             Simple! We're your go-to spot for:
           </p>
           
-          <ul className={styles.featuresList}>
+          <ul className="features-list">
             <li>✅ Viral videos that make you LOL, cry, or say "WTF" 😂</li>
             <li>✅ AI tools that blow your mind 🤯</li>
             <li>✅ Friends who share the same vibes 👯</li>
             <li>✅ Good vibes only, no toxicity! 🌈</li>
           </ul>
 
-          <p className={styles.sectionText}>
+          <p className="section-text">
             Think of us as your chill internet buddy! 😎
           </p>
         </div>
       </section>
 
       {/* Viral Videos Zone */}
-      <section className={styles.section} id="videos">
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>🔥 Viral Videos Zone 🔥</h2>
-          <div className={styles.waveDivider}></div>
+      <section className="section" id="videos">
+        <div className="section-content">
+          <h2 className="section-title">🔥 Viral Videos Zone 🔥</h2>
+          <div className="wave-divider"></div>
           
-          <p className={styles.sectionText}>
+          <p className="section-text">
             Watch. Laugh. Share. Repeat!
           </p>
 
           {/* Platform Icons */}
-          <div className={styles.platformIcons}>
-            <div className={styles.platformIcon}>
-              <span className={styles.icon}>▶️</span>
+          <div className="platform-icons">
+            <div className="platform-icon">
+              <span className="icon">▶️</span>
               <span>YouTube</span>
             </div>
-            <div className={styles.platformIcon}>
-              <span className={styles.icon}>🎵</span>
+            <div className="platform-icon">
+              <span className="icon">🎵</span>
               <span>TikTok</span>
             </div>
-            <div className={styles.platformIcon}>
-              <span className={styles.icon}>📸</span>
+            <div className="platform-icon">
+              <span className="icon">📸</span>
               <span>Instagram</span>
             </div>
-            <div className={styles.platformIcon}>
-              <span className={styles.icon}>❤️</span>
+            <div className="platform-icon">
+              <span className="icon">❤️</span>
               <span>Favorites</span>
             </div>
           </div>
 
           {/* Trending Videos */}
-          <div className={styles.trendingSection}>
-            <h3 className={styles.subTitle}>Trending Now:</h3>
-            <ul className={styles.videoList}>
+          <div className="trending-section">
+            <h3 className="sub-title">Trending Now:</h3>
+            <ul className="video-list">
               <li>• "Cat fails compilation" - 2.1M views 🐱</li>
               <li>• "Dance challenge gone wrong" - 1.8M views 💃</li>
               <li>• "Cooking disaster" - 1.5M views 👨‍🍳</li>
@@ -185,15 +174,15 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className={styles.sectionButtons}>
+          <div className="section-buttons">
             <button 
-              className={`${styles.btn} ${styles.btnPrimary}`} 
+              className="btn btn-primary" 
               onClick={() => playSound('boop')}
             >
               📺 View All Videos
             </button>
             <button 
-              className={`${styles.btn} ${styles.btnOutline}`} 
+              className="btn btn-outline" 
               onClick={() => {
                 playSound('boop');
                 addLovePoints();
@@ -206,59 +195,59 @@ export default function Home() {
       </section>
 
       {/* AI Generator Lab */}
-      <section className={styles.section} id="ai">
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>🧪 AI Generator Lab 🧪</h2>
-          <div className={styles.waveDivider}></div>
+      <section className="section" id="ai">
+        <div className="section-content">
+          <h2 className="section-title">🧪 AI Generator Lab 🧪</h2>
+          <div className="wave-divider"></div>
           
-          <p className={styles.sectionText}>
+          <p className="section-text">
             Create magic with AI! No skills needed!
           </p>
 
-          <div className={styles.aiCards}>
+          <div className="ai-cards">
             <div 
-              className={styles.aiCard} 
+              className="ai-card" 
               onMouseEnter={() => playSound('boop')}
             >
-              <div className={styles.cardIcon}>💬</div>
+              <div className="card-icon">💬</div>
               <h3>🤖 Chat AI</h3>
               <p>"Talk to our AI buddy - it's smarter than your ex!"</p>
             </div>
 
             <div 
-              className={styles.aiCard} 
+              className="ai-card" 
               onMouseEnter={() => playSound('boop')}
             >
-              <div className={styles.cardIcon}>🎨</div>
+              <div className="card-icon">🎨</div>
               <h3>🎨 Image Generator</h3>
               <p>"Type what you want, get amazing art instantly!"</p>
             </div>
 
             <div 
-              className={styles.aiCard} 
+              className="ai-card" 
               onMouseEnter={() => playSound('boop')}
             >
-              <div className={styles.cardIcon}>🎬</div>
+              <div className="card-icon">🎬</div>
               <h3>🎬 Video Generator</h3>
               <p>"Turn your ideas into videos in seconds!"</p>
             </div>
 
             <div 
-              className={styles.aiCard} 
+              className="ai-card" 
               onMouseEnter={() => playSound('boop')}
             >
-              <div className={styles.cardIcon}>📜</div>
+              <div className="card-icon">📜</div>
               <h3>📜 History</h3>
               <p>"See what you've created!"</p>
             </div>
           </div>
 
-          <p className={styles.smallText}>
+          <p className="small-text">
             ✨ Powered by: YouTube API, Pollinations AI, and more!
           </p>
 
           <button 
-            className={`${styles.btn} ${styles.btnPrimary}`} 
+            className="btn btn-primary" 
             onClick={() => playSound('boop')}
           >
             🚀 Start Creating!
@@ -267,71 +256,71 @@ export default function Home() {
       </section>
 
       {/* Get Friend Get Love */}
-      <section className={styles.section} id="love">
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>💖 Get Friend Get Love 💖</h2>
-          <div className={styles.waveDivider}></div>
+      <section className="section" id="love">
+        <div className="section-content">
+          <h2 className="section-title">💖 Get Friend Get Love 💖</h2>
+          <div className="wave-divider"></div>
           
-          <p className={styles.sectionText}>
+          <p className="section-text">
             More friends = More love! Simple math! ❤️
           </p>
 
-          <div className={styles.loveInfo}>
-  <h3 className={styles.loveInfoTitle}>💖 Here's How It Works 💖</h3>
-  <ol className={styles.loveSteps}>
-    <li>Share your GenZee link with friends</li>
-    <li>Friends join using your special link</li>
-    <li>You get LOVE POINTS! 💯 (virtual hugs included)</li>
-  </ol>
-</div>
+          <div className="love-info">
+            <h3 className="love-info-title">💖 Here's How It Works 💖</h3>
+            <ol className="love-steps">
+              <li>Share your GenZee link with friends</li>
+              <li>Friends join using your special link</li>
+              <li>You get LOVE POINTS! 💯 (virtual hugs included)</li>
+            </ol>
+          </div>
 
           {/* Love Tiers */}
-          <div className={styles.loveTiers}>
-            <div className={styles.tierCard}>
-              <div className={styles.tierIcon}>🥉</div>
+          <div className="love-tiers">
+            <div className="tier-card">
+              <div className="tier-icon">🥉</div>
               <h3>Bronze Heart</h3>
               <p>1-10 friends</p>
-              <p className={styles.tierPoints}>= 100 love points</p>
+              <p className="tier-points">= 100 love points</p>
             </div>
 
-            <div className={styles.tierCard}>
-              <div className={styles.tierIcon}>🥈</div>
+            <div className="tier-card">
+              <div className="tier-icon">🥈</div>
               <h3>Silver Heart</h3>
               <p>11-50 friends</p>
-              <p className={styles.tierPoints}>= 500 love points</p>
+              <p className="tier-points">= 500 love points</p>
             </div>
 
-            <div className={styles.tierCard}>
-              <div className={styles.tierIcon}>🥇</div>
+            <div className="tier-card">
+              <div className="tier-icon">🥇</div>
               <h3>Gold Heart</h3>
               <p>51+ friends</p>
-              <p className={styles.tierPoints}>= 1000+ love points!</p>
+              <p className="tier-points">= 1000+ love points!</p>
             </div>
           </div>
 
           {/* Love Points Counter */}
-          <div className={styles.loveCounter}>
+          <div className="love-counter">
             <h3>Your Stats:</h3>
-            <div className={styles.statsRow}>
+            <div className="stats-row">
               <span>💖 Love Points:</span>
-              <span className={styles.loveNumber}>{lovePoints}</span>
+              <span className="love-number">{lovePoints}</span>
             </div>
-            <div className={styles.statsRow}>
+            <div className="stats-row">
               <span>👯 Friends:</span>
-              <span className={styles.friendNumber}>{friendCount}</span>
+              <span className="friend-number">{friendCount}</span>
             </div>
           </div>
 
-          <p className={styles.loveDisclaimer}>
+          <p className="love-disclaimer">
             ❌ Can't buy anything (we're not that serious)<br/>
             ✅ Brag to your friends<br/>
             ✅ Feel loved and appreciated<br/>
             ✅ Get virtual hugs from us! 🤗
           </p>
 
-          <div className={styles.sectionButtons}>
+          <div className="section-buttons">
             <button 
-              className={`${styles.btn} ${styles.btnPrimary}`} 
+              className="btn btn-primary" 
               onClick={() => {
                 playSound('boop');
                 addLovePoints();
@@ -340,7 +329,7 @@ export default function Home() {
               💌 Share Your Link
             </button>
             <button 
-              className={`${styles.btn} ${styles.btnSecondary}`} 
+              className="btn btn-secondary" 
               onClick={() => {
                 playSound('boop');
                 setLovePoints(lovePoints + 50);
@@ -352,17 +341,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ViralScape Promise */}
-      <section className={styles.section} id="promise">
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>🤝 GenZee Promise 🤝</h2>
-          <div className={styles.waveDivider}></div>
+      {/* GenZee Promise */}
+      <section className="section" id="promise">
+        <div className="section-content">
+          <h2 className="section-title">🤝 GenZee Promise 🤝</h2>
+          <div className="wave-divider"></div>
           
-          <p className={styles.sectionText}>
+          <p className="section-text">
             We promise to give you:
           </p>
 
-          <ul className={styles.promiseList}>
+          <ul className="promise-list">
             <li>✅ Videos that make you feel something (happy, sad, shocked, whatever!)</li>
             <li>✅ Safe content (no creepy stuff, we promise!)</li>
             <li>✅ AI tools that actually work (most of the time 😅)</li>
@@ -373,57 +362,57 @@ export default function Home() {
             <li>✅ No fake news, no toxicity, just fun!</li>
           </ul>
 
-          <p className={styles.sectionText}>
+          <p className="section-text">
             That's it! No complicated promises, just good times! 😊
           </p>
         </div>
       </section>
 
       {/* Penutup Kocak */}
-      <section className={styles.section} id="fun">
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>🎉 You Made It! 🎉</h2>
-          <div className={styles.waveDivider}></div>
+      <section className="section" id="fun">
+        <div className="section-content">
+          <h2 className="section-title">🎉 You Made It! 🎉</h2>
+          <div className="wave-divider"></div>
           
-          <p className={styles.sectionText}>
+          <p className="section-text">
             If you're still reading this, you're officially awesome! 🌟
           </p>
 
           {/* Random Joke */}
-          <div className={styles.jokeBox}>
+          <div className="joke-box">
             <h3>Random Joke of the Day:</h3>
-            <p className={styles.jokeText}>{joke}</p>
+            <p className="joke-text">{joke}</p>
           </div>
 
-          <p className={styles.sectionText}>
+          <p className="section-text">
             Still here? Here's a virtual cookie! 🍪<br/>
             (You can't eat it, but imagine it's delicious!)
           </p>
 
-          <div className={styles.cookieEmoji}>🍪</div>
+          <div className="cookie-emoji">🍪</div>
 
-          <div className={styles.sectionButtons}>
+          <div className="section-buttons">
             <button 
-              className={`${styles.btn} ${styles.btnPrimary}`} 
+              className="btn btn-primary" 
               onClick={() => playSound('boop')}
             >
               🚀 Let's Go!
             </button>
             <button 
-              className={`${styles.btn} ${styles.btnSecondary}`} 
+              className="btn btn-secondary" 
               onClick={() => playSound('boop')}
             >
               🤖 Try AI Now
             </button>
             <button 
-              className={`${styles.btn} ${styles.btnOutline}`} 
+              className="btn btn-outline" 
               onClick={() => playSound('boop')}
             >
               📺 Watch Videos
             </button>
           </div>
 
-          <p className={styles.footerJoke}>
+          <p className="footer-joke">
             P.S. If you see any bugs, just ignore them.<br/>
             They're part of the charm! 🐛✨
           </p>
