@@ -940,4 +940,49 @@ body {
   .friend-number {
     font-size: 2.2rem !important;
   }
+
+  /* ============ FIX CENTERING UNTUK DESKTOP ============ */
+
+/* Fix 1: Center "Trending Now" heading */
+@media (min-width: 769px) {
+  .trending-section .sub-title {
+    text-align: center !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 800px !important;
+    font-size: 2.1rem !important;
+    margin-bottom: 25px !important;
+  }
+  
+  /* Fix 2: Center "Start Creating" button dengan jarak atas yang cukup */
+  #ai .section-content > .small-text + .btn.btn-primary,
+  #ai .section-content > .btn.btn-primary:last-child {
+    display: block !important;
+    margin: 50px auto 0 !important;
+    max-width: 400px !important;
+    width: fit-content !important;
+  }
+  
+  /* Fix 3: Pastikan .small-text di atas button juga center */
+  #ai .small-text {
+    text-align: center !important;
+    margin-top: 45px !important;
+    margin-bottom: 30px !important;
+    max-width: 700px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+/* Extra fix: Pastikan semua section content full width di desktop */
+@media (min-width: 1024px) {
+  .section-content {
+    padding: 0 40px !important;
+  }
+  
+  .hero-content {
+    padding: 0 30px !important;
+  }
+}
 }
