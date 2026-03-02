@@ -13,6 +13,7 @@ export default function Home() {
   const [joke, setJoke] = useState('');
   const [isClient, setIsClient] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -103,12 +104,18 @@ export default function Home() {
           
           {/* Hamburger Menu Button */}
           <button 
-            className="hamburger-btn" 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? '✕' : '☰'}
-          </button>
+  className="hamburger-btn" 
+  onClick={() => {
+    if (window.innerWidth <= 768) {
+      setIsMenuOpen(!isMenuOpen);
+    } else {
+      setIsDesktopMenuOpen(!isDesktopMenuOpen);
+    }
+  }}
+  aria-label="Toggle menu"
+>
+  {isMenuOpen || isDesktopMenuOpen ? '✕' : '☰'}
+</button>
         </div>
         
         {/* Mobile Menu Overlay */}
@@ -175,6 +182,75 @@ export default function Home() {
               </div>
             </div>
           </div>
+        )}
+                  {/* Desktop Menu Overlay */}
+        {isDesktopMenuOpen && (
+          <>
+            <div 
+              className="desktop-menu-overlay active" 
+              onClick={() => setIsDesktopMenuOpen(false)}
+            ></div>
+            <div className="desktop-menu active">
+              <div className="desktop-menu-header">
+                <span className="desktop-menu-title">✨ GenZee Menu ✨</span>
+                <button 
+                  className="desktop-menu-close" 
+                  onClick={() => setIsDesktopMenuOpen(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <ul className="desktop-menu-list">
+                <li>
+                  <a href="#home" onClick={() => setIsDesktopMenuOpen(false)}>
+                    🏠 Home
+                  </a>
+                </li>
+                <li>
+                  <a href="#videos" onClick={() => setIsDesktopMenuOpen(false)}>
+                    🎥 Videos
+                  </a>
+                  <ul className="submenu">
+                    <li><a href="#youtube" onClick={() => setIsDesktopMenuOpen(false)}>▶️ YouTube</a></li>
+                    <li><a href="#tiktok" onClick={() => setIsDesktopMenuOpen(false)}>🎵 TikTok</a></li>
+                    <li><a href="#instagram" onClick={() => setIsDesktopMenuOpen(false)}>📸 Instagram</a></li>
+                    <li><a href="#favorites" onClick={() => setIsDesktopMenuOpen(false)}>❤️ Favorites</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#ai" onClick={() => setIsDesktopMenuOpen(false)}>
+                    🤖 AI Generator
+                  </a>
+                  <ul className="submenu">
+                    <li><a href="#chat" onClick={() => setIsDesktopMenuOpen(false)}>💬 Chat</a></li>
+                    <li><a href="#image" onClick={() => setIsDesktopMenuOpen(false)}>🎨 Image</a></li>
+                    <li><a href="#video" onClick={() => setIsDesktopMenuOpen(false)}>🎬 Video</a></li>
+                    <li><a href="#history" onClick={() => setIsDesktopMenuOpen(false)}>📜 History</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a 
+                    href="https://google.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    onClick={() => setIsDesktopMenuOpen(false)}
+                  >
+                    🔗 Link (Google)
+                  </a>
+                </li>
+                <li>
+                  <a href="#translator" onClick={() => setIsDesktopMenuOpen(false)}>
+                    🌐 Translator
+                  </a>
+                </li>
+              </ul>
+              
+              <div className="desktop-menu-footer">
+                <p>GenZee - Your Digital Playground</p>
+              </div>
+            </div>
+          </>
         )}
       </nav>
       
