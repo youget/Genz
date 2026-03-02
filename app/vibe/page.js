@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import './globals.css';
+import '../globals.css';
 
 // Navbar Component (reused from main page)
 function Navbar({ isDarkMode, setIsDarkMode }) {
