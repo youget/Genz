@@ -12,6 +12,7 @@ export default function Home() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [joke, setJoke] = useState('');
   const [isClient, setIsClient] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
