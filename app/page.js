@@ -79,9 +79,104 @@ export default function Home() {
       </div>
     );
   }
-
+  
   return (
     <div className={`container ${isDarkMode ? 'dark-mode' : ''}`}>
+      
+      {/* ========== NAVBAR ========== */}
+      <nav className="navbar">
+        {/* Logo */}
+        <div className="navbar-logo">
+          <span className="navbar-logo-text">✨ GenZee ✨</span>
+        </div>
+        
+        {/* Menu & Theme Toggle */}
+        <div className="navbar-right">
+          {/* Theme Toggle Button */}
+          <button 
+            className="theme-toggle-btn" 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {isDarkMode ? '☀️' : '🌙'}
+          </button>
+          
+          {/* Hamburger Menu Button */}
+          <button 
+            className="hamburger-btn" 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? '✕' : '☰'}
+          </button>
+        </div>
+        
+        {/* Mobile Menu Overlay */}
+        {isMenuOpen && (
+          <div className="mobile-menu-overlay" onClick={() => setIsMenuOpen(false)}>
+            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+              <div className="mobile-menu-header">
+                <span className="mobile-menu-title">✨ GenZee Menu ✨</span>
+                <button 
+                  className="mobile-menu-close" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <ul className="mobile-menu-list">
+                <li>
+                  <a href="#home" onClick={() => setIsMenuOpen(false)}>
+                    🏠 Home
+                  </a>
+                </li>
+                <li>
+                  <a href="#videos" onClick={() => setIsMenuOpen(false)}>
+                    🎥 Videos
+                  </a>
+                  <ul className="submenu">
+                    <li><a href="#youtube" onClick={() => setIsMenuOpen(false)}>▶️ YouTube</a></li>
+                    <li><a href="#tiktok" onClick={() => setIsMenuOpen(false)}>🎵 TikTok</a></li>
+                    <li><a href="#instagram" onClick={() => setIsMenuOpen(false)}>📸 Instagram</a></li>
+                    <li><a href="#favorites" onClick={() => setIsMenuOpen(false)}>❤️ Favorites</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#ai" onClick={() => setIsMenuOpen(false)}>
+                    🤖 AI Generator
+                  </a>
+                  <ul className="submenu">
+                    <li><a href="#chat" onClick={() => setIsMenuOpen(false)}>💬 Chat</a></li>
+                    <li><a href="#image" onClick={() => setIsMenuOpen(false)}>🎨 Image</a></li>
+                    <li><a href="#video" onClick={() => setIsMenuOpen(false)}>🎬 Video</a></li>
+                    <li><a href="#history" onClick={() => setIsMenuOpen(false)}>📜 History</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a 
+                    href="https://google.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    🔗 Link (Google)
+                  </a>
+                </li>
+                <li>
+                  <a href="#translator" onClick={() => setIsMenuOpen(false)}>
+                    🌐 Translator
+                  </a>
+                </li>
+              </ul>
+              
+              <div className="mobile-menu-footer">
+                <p>GenZee - Your Digital Playground</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
       
       {/* Hero Section */}
       <section className="hero">
