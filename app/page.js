@@ -6,7 +6,7 @@ import './globals.css';
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [lovePoints, setLovePoints] = useState(0);
   const [friendCount, setFriendCount] = useState(0);
   const [joke, setJoke] = useState('');
@@ -32,6 +32,19 @@ export default function Home() {
     setJoke(jokes[Math.floor(Math.random() * jokes.length)]);
   }, []);
 
+  // Close dropdown on scroll/mouse move
+  useEffect(() => {
+    const handleActivity = () => {
+      setIsDropdownOpen(false);
+    };
+    window.addEventListener('scroll', handleActivity);
+    window.addEventListener('mousemove', handleActivity);
+    return () => {
+      window.removeEventListener('scroll', handleActivity);
+      window.removeEventListener('mousemove', handleActivity);
+    };
+  }, []);
+
   // Play sound function (console only for now)
   const playSound = (soundName) => {
     if (isClient) {
@@ -45,22 +58,6 @@ export default function Home() {
     setLovePoints(prev => prev + points);
     playSound('boop');
   };
-
-  // Close menus when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setIsMenuOpen(false);
-      setIsDesktopMenuOpen(false);
-    };
-    
-    if (isMenuOpen || isDesktopMenuOpen) {
-      document.addEventListener('click', handleClickOutside);
-    }
-    
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isMenuOpen, isDesktopMenuOpen]);
 
   // If not client yet, show loading
   if (!isClient) {
@@ -80,11 +77,11 @@ export default function Home() {
           className="navbar-logo" 
           onClick={() => {
             setIsMenuOpen(false);
-            setIsDesktopMenuOpen(false);
+            setIsDropdownOpen(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
-          <span className="navbar-logo-text">✨ GenZee ✨</span>
+          <span className="navbar-logo-text">GenZee</span>
         </div>
         
         <div className="navbar-right">
@@ -99,23 +96,86 @@ export default function Home() {
             {isDarkMode ? '☀️' : '🌙'}
           </button>
           
+          {/* Desktop Dropdown Menu Trigger */}
           <button 
-            className="hamburger-btn" 
+            className="hamburger-btn desktop-trigger" 
             onClick={(e) => {
               e.stopPropagation();
-              if (window.innerWidth <= 768) {
-                setIsMenuOpen(!isMenuOpen);
-                setIsDesktopMenuOpen(false);
-              } else {
-                setIsDesktopMenuOpen(!isDesktopMenuOpen);
-                setIsMenuOpen(false);
-              }
+              setIsDropdownOpen(!isDropdownOpen);
+              setIsMenuOpen(false);
             }}
-            aria-label="Toggle menu"
+            aria-label="Open menu"
+            onMouseEnter={() => setIsDropdownOpen(true)}
           >
-            {isMenuOpen || isDesktopMenuOpen ? '✕' : '☰'}
+            ☰
+          </button>
+          
+          {/* Mobile Menu Trigger */}
+          <button 
+            className="hamburger-btn mobile-trigger" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMenuOpen(!isMenuOpen);
+              setIsDropdownOpen(false);
+            }}
+            aria-label="Open menu"
+          >
+            {isMenuOpen ? '✕' : '☰'}
           </button>
         </div>
+        
+        {/* Desktop Dropdown Menu */}
+        {isDropdownOpen && (
+          <div 
+            className="desktop-dropdown"
+            onMouseLeave={() => setIsDropdownOpen(false)}
+          >
+            <ul className="dropdown-menu-list">
+              <li>
+                <a href="#home" onClick={() => setIsDropdownOpen(false)}>
+                  🏠 Home
+                </a>
+              </li>
+              <li>
+                <a href="#videos" onClick={() => setIsDropdownOpen(false)}>
+                  🎥 Videos
+                </a>
+                <ul className="dropdown-submenu">
+                  <li><a href="#youtube" onClick={() => setIsDropdownOpen(false)}>▶️ YouTube</a></li>
+                  <li><a href="#tiktok" onClick={() => setIsDropdownOpen(false)}>🎵 TikTok</a></li>
+                  <li><a href="#instagram" onClick={() => setIsDropdownOpen(false)}>📸 Instagram</a></li>
+                  <li><a href="#favorites" onClick={() => setIsDropdownOpen(false)}>❤️ Favorites</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#ai" onClick={() => setIsDropdownOpen(false)}>
+                  🤖 AI Generator
+                </a>
+                <ul className="dropdown-submenu">
+                  <li><a href="#chat" onClick={() => setIsDropdownOpen(false)}>💬 Chat</a></li>
+                  <li><a href="#image" onClick={() => setIsDropdownOpen(false)}>🎨 Image</a></li>
+                  <li><a href="#video" onClick={() => setIsDropdownOpen(false)}>🎬 Video</a></li>
+                  <li><a href="#history" onClick={() => setIsDropdownOpen(false)}>📜 History</a></li>
+                </ul>
+              </li>
+              <li>
+                <a 
+                  href="https://google.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  🔗 Link (Google)
+                </a>
+              </li>
+              <li>
+                <a href="#translator" onClick={() => setIsDropdownOpen(false)}>
+                  🌐 Translator
+                </a>
+              </li>
+            </ul>
+          </div>
+        )}
         
         {/* Mobile Menu */}
         {isMenuOpen && (
@@ -128,7 +188,7 @@ export default function Home() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mobile-menu-header">
-                <span className="mobile-menu-title">✨ GenZee Menu ✨</span>
+                <span className="mobile-menu-title">GenZee Menu</span>
                 <button 
                   className="mobile-menu-close"
                   onClick={() => setIsMenuOpen(false)}
@@ -188,83 +248,13 @@ export default function Home() {
             </div>
           </div>
         )}
-        
-        {/* Desktop Menu */}
-        {isDesktopMenuOpen && (
-          <>
-            <div 
-              className="desktop-menu-overlay"
-              onClick={() => setIsDesktopMenuOpen(false)}
-            ></div>
-            <div className="desktop-menu">
-              <div className="desktop-menu-header">
-                <span className="desktop-menu-title">✨ GenZee Menu ✨</span>
-                <button 
-                  className="desktop-menu-close"
-                  onClick={() => setIsDesktopMenuOpen(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <ul className="desktop-menu-list">
-                <li>
-                  <a href="#home" onClick={() => setIsDesktopMenuOpen(false)}>
-                    🏠 Home
-                  </a>
-                </li>
-                <li>
-                  <a href="#videos" onClick={() => setIsDesktopMenuOpen(false)}>
-                    🎥 Videos
-                  </a>
-                  <ul className="submenu">
-                    <li><a href="#youtube" onClick={() => setIsDesktopMenuOpen(false)}>▶️ YouTube</a></li>
-                    <li><a href="#tiktok" onClick={() => setIsDesktopMenuOpen(false)}>🎵 TikTok</a></li>
-                    <li><a href="#instagram" onClick={() => setIsDesktopMenuOpen(false)}>📸 Instagram</a></li>
-                    <li><a href="#favorites" onClick={() => setIsDesktopMenuOpen(false)}>❤️ Favorites</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="#ai" onClick={() => setIsDesktopMenuOpen(false)}>
-                    🤖 AI Generator
-                  </a>
-                  <ul className="submenu">
-                    <li><a href="#chat" onClick={() => setIsDesktopMenuOpen(false)}>💬 Chat</a></li>
-                    <li><a href="#image" onClick={() => setIsDesktopMenuOpen(false)}>🎨 Image</a></li>
-                    <li><a href="#video" onClick={() => setIsDesktopMenuOpen(false)}>🎬 Video</a></li>
-                    <li><a href="#history" onClick={() => setIsDesktopMenuOpen(false)}>📜 History</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a 
-                    href="https://google.com" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    onClick={() => setIsDesktopMenuOpen(false)}
-                  >
-                    🔗 Link (Google)
-                  </a>
-                </li>
-                <li>
-                  <a href="#translator" onClick={() => setIsDesktopMenuOpen(false)}>
-                    🌐 Translator
-                  </a>
-                </li>
-              </ul>
-              
-              <div className="desktop-menu-footer">
-                <p>GenZee - Your Digital Playground</p>
-              </div>
-            </div>
-          </>
-        )}
       </nav>
 
       {/* ========== HERO SECTION ========== */}
       <section className="hero" id="home">
         <div className="hero-content">
           <h1 className="hero-title">
-            ✨ Welcome to <span className="logo">GenZee</span>! ✨
+            ✨ Welcome to <span className="logo">GenZee</span> ✨
           </h1>
           <p className="hero-subtitle">
             Gen Z playground for viral videos & AI magic!
