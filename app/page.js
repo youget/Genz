@@ -60,14 +60,29 @@ export default function Home() {
   };
 
   // If not client yet, show loading
-  if (!isClient) {
-    return (
+  useEffect(() => {
+  setIsClient(true);
+}, []);
+
+// Render halaman normal, tapi sembunyikan konten sensitive sampai client ready
+return (
+  <div className={`container ${isDarkMode ? 'dark-mode' : ''}`}>
+    {!isClient ? null : (  // Sembunyikan konten yang butuh window/DOM
+      <>
+        <nav className="navbar">...</nav>
+        <section className="hero">...</section>
+        {/* ... semua konten lain ... */}
+      </>
+    )}
+    
+    {/* Loading screen hanya untuk UX visual */}
+    {!isClient && (
       <div className="loading-screen">
         <p>Loading GenZee...</p>
       </div>
-    );
-  }
-
+    )}
+  </div>
+);
   return (
     <div className={`container ${isDarkMode ? 'dark-mode' : ''}`}>
       
