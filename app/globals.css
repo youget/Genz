@@ -904,13 +904,21 @@ body {
   }
 }
 
-.navbar.visible {
-  transform: translateY(0);
-  opacity: 1;
+/* ========== CRITICAL FIXES ========== */
+/* Fix logo underline */
+.navbar-logo {
+  text-decoration: none !important;
+  display: inline-block;
 }
 
-.navbar.hidden {
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
+/* Fix container width */
+.container {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Fix sections alignment */
+.section, .hero {
+  width: 100%;
+  box-sizing: border-box;
 }
