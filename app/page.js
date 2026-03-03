@@ -102,6 +102,178 @@ export default function Home() {
         {/* Mobile Menu */}
         {isMenuOpen && window.innerWidth <= 768 && (
           <div className="mobile-menu-overlay" onClick={() => setIsMenuOpen(false)}>
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+
+export default function Home() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [videoMenuOpen, setVideoMenuOpen] = useState(false);
+  const [favoriteMenuOpen, setFavoriteMenuOpen] = useState(false);
+  const [aiMenuOpen, setAiMenuOpen] = useState(false);
+  const [lovePoints, setLovePoints] = useState(0);
+  const [friendCount, setFriendCount] = useState(0);
+  const [joke, setJoke] = useState('');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setFriendCount(Math.floor(Math.random() * 1000) + 1);
+    
+    const jokes = [
+      "Why did the Gen Z kid cross the road? To get to the other TikTok! 😂",
+      "What's a Gen Z's favorite exercise? Scrolling! 💪",
+      "How many Gen Z does it take to change a lightbulb? Just one, they learned it from YouTube! 📱",
+      "Why don't Gen Z kids tell jokes? They're too busy making TikTok dances! 🕺",
+      "What did the WiFi say to the Gen Z? 'I'm really feeling the connection!' 📶",
+      "Why was the smartphone sad? It had too many hang-ups! 📱",
+      "What's a Gen Z's favorite type of music? Wi-Fi! 🎵",
+      "Why did the meme go to therapy? It had too many issues to resolve! 😅"
+    ];
+    setJoke(jokes[Math.floor(Math.random() * jokes.length)]);
+  }, []);
+
+  useEffect(() => {
+    const handleActivity = () => {
+      setIsDropdownOpen(false);
+      setVideoMenuOpen(false);
+      setFavoriteMenuOpen(false);
+      setAiMenuOpen(false);
+    };
+    window.addEventListener('scroll', handleActivity);
+    window.addEventListener('mousemove', handleActivity);
+    return () => {
+      window.removeEventListener('scroll', handleActivity);
+      window.removeEventListener('mousemove', handleActivity);
+    };
+  }, []);
+
+  const playSound = (soundName) => {
+    if (isClient) console.log(`Playing sound: ${soundName}`);
+  };
+
+  const addLovePoints = () => {
+    const points = Math.floor(Math.random() * 10) + 1;
+    setLovePoints(prev => prev + points);
+    playSound('boop');
+  };
+
+  // Toggle submenu functions
+  const toggleVideoMenu = (e) => {
+    e.stopPropagation();
+    setVideoMenuOpen(!videoMenuOpen);
+    setFavoriteMenuOpen(false);
+    setAiMenuOpen(false);
+  };
+
+  const toggleFavoriteMenu = (e) => {
+    e.stopPropagation();
+    setFavoriteMenuOpen(!favoriteMenuOpen);
+    setVideoMenuOpen(false);
+    setAiMenuOpen(false);
+  };
+
+  const toggleAiMenu = (e) => {
+    e.stopPropagation();
+    setAiMenuOpen(!aiMenuOpen);
+    setVideoMenuOpen(false);
+    setFavoriteMenuOpen(false);
+  };
+
+  return (
+    <div className={`container ${isDarkMode ? 'dark-mode' : ''}`}>
+      
+      {/* ========== NAVBAR ========== */}
+      <nav className="navbar">
+        <Link href="/" className="navbar-logo">
+          <span className="navbar-logo-text">GenZee</span>
+        </Link>
+        
+        <div className="navbar-right">
+          <button 
+            className="theme-toggle-btn" 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+          >
+            {isDarkMode ? '☀️' : '🌙'}
+          </button>
+          
+          <button 
+            className="hamburger-btn" 
+            onClick={() => {
+              if (window.innerWidth <= 768) {
+                setIsMenuOpen(!isMenuOpen);
+                setIsDropdownOpen(false);
+              } else {
+                setIsDropdownOpen(!isDropdownOpen);
+                setIsMenuOpen(false);
+                setVideoMenuOpen(false);
+                setFavoriteMenuOpen(false);
+                setAiMenuOpen(false);
+              }
+            }}
+          >
+            {isMenuOpen || isDropdownOpen ? '✕' : '☰'}
+          </button>
+        </div>
+        
+        {/* Desktop Menu */}
+        {isDropdownOpen && window.innerWidth > 768 && (
+          <div className="desktop-dropdown" onMouseLeave={() => {
+            setIsDropdownOpen(false);
+            setVideoMenuOpen(false);
+            setFavoriteMenuOpen(false);
+            setAiMenuOpen(false);
+          }}>
+            <ul className="dropdown-menu-list">
+              <li><Link href="/" onClick={() => setIsDropdownOpen(false)}>🏠 Home</Link></li>
+              
+              <li>
+                <button onClick={toggleVideoMenu} className="submenu-toggle">
+                  🎥 Video {videoMenuOpen ? '▲' : '▼'}
+                </button>
+                {videoMenuOpen && (
+                  <ul className="dropdown-submenu">
+                    <li><Link href="/vibe?q=youtube" onClick={() => setIsDropdownOpen(false)}>▶️ YouTube</Link></li>
+                    <li><Link href="/vibe?q=tiktok" onClick={() => setIsDropdownOpen(false)}>🎵 TikTok</Link></li>
+                    <li><Link href="/vibe?q=instagram" onClick={() => setIsDropdownOpen(false)}>📸 Instagram</Link></li>
+                  </ul>
+                )}
+              </li>
+              
+              <li>
+                <button onClick={toggleFavoriteMenu} className="submenu-toggle">
+                  ❤️ Favorite {favoriteMenuOpen ? '▲' : '▼'}
+                </button>
+                {favoriteMenuOpen && (
+                  <ul className="dropdown-submenu">
+                    <li><Link href="/favorite/videos" onClick={() => setIsDropdownOpen(false)}>🎬 Videos</Link></li>
+                    <li><Link href="/favorite/ai" onClick={() => setIsDropdownOpen(false)}>🤖 AI Creations</Link></li>
+                  </ul>
+                )}
+              </li>
+              
+              <li>
+                <a 
+                  href="https://google.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  🔗 Google
+                </a>
+              </li>
+              
+              <li><Link href="/translator" onClick={() => setIsDropdownOpen(false)}>🌐 Translator</Link></li>
+            </ul>
+          </div>
+        )}
+        
+        {/* Mobile Menu */}
+        {isMenuOpen && window.innerWidth <= 768 && (
+          <div className="mobile-menu-overlay" onClick={() => setIsMenuOpen(false)}>
             <div className="mobile-menu" onClick={e => e.stopPropagation()}>
               <div className="mobile-menu-header">
                 <span className="mobile-menu-title">GenZee Menu</span>
@@ -109,8 +281,44 @@ export default function Home() {
               </div>
               <ul className="mobile-menu-list">
                 <li><Link href="/" onClick={() => setIsMenuOpen(false)}>🏠 Home</Link></li>
-                <li><Link href="/vibe" onClick={() => setIsMenuOpen(false)}>✨ Vibe</Link></li>
-                <li><Link href="/ai" onClick={() => setIsMenuOpen(false)}>🤖 AI Generator</Link></li>
+                
+                <li>
+                  <button onClick={toggleVideoMenu} className="submenu-toggle mobile">
+                    🎥 Video {videoMenuOpen ? '▲' : '▼'}
+                  </button>
+                  {videoMenuOpen && (
+                    <ul className="submenu">
+                      <li><Link href="/vibe?q=youtube" onClick={() => setIsMenuOpen(false)}>▶️ YouTube</Link></li>
+                      <li><Link href="/vibe?q=tiktok" onClick={() => setIsMenuOpen(false)}>🎵 TikTok</Link></li>
+                      <li><Link href="/vibe?q=instagram" onClick={() => setIsMenuOpen(false)}>📸 Instagram</Link></li>
+                    </ul>
+                  )}
+                </li>
+                
+                <li>
+                  <button onClick={toggleFavoriteMenu} className="submenu-toggle mobile">
+                    ❤️ Favorite {favoriteMenuOpen ? '▲' : '▼'}
+                  </button>
+                  {favoriteMenuOpen && (
+                    <ul className="submenu">
+                      <li><Link href="/favorite/videos" onClick={() => setIsMenuOpen(false)}>🎬 Videos</Link></li>
+                      <li><Link href="/favorite/ai" onClick={() => setIsMenuOpen(false)}>🤖 AI Creations</Link></li>
+                    </ul>
+                  )}
+                </li>
+                
+                <li>
+                  <a 
+                    href="https://google.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    🔗 Google
+                  </a>
+                </li>
+                
+                <li><Link href="/translator" onClick={() => setIsMenuOpen(false)}>🌐 Translator</Link></li>
               </ul>
               <div className="mobile-menu-footer">
                 <p>GenZee - Your Digital Playground</p>
@@ -119,7 +327,7 @@ export default function Home() {
           </div>
         )}
       </nav>
-
+      
       {/* ========== HERO SECTION ========== */}
       <section className="hero" id="home">
         <div className="hero-content">
@@ -413,22 +621,13 @@ export default function Home() {
           <div className="cookie-emoji">🍪</div>
 
           <div className="section-buttons">
-            <button 
-              className="btn btn-primary" 
-              onClick={() => playSound('boop')}
-            >
+            <button className="btn btn-primary" onClick={() => playSound('boop')}>
               🚀 Let's Go!
             </button>
-            <button 
-              className="btn btn-secondary" 
-              onClick={() => playSound('boop')}
-            >
+            <button className="btn btn-secondary" onClick={() => playSound('boop')}>
               🤖 Try AI Now
             </button>
-            <button 
-              className="btn btn-outline" 
-              onClick={() => playSound('boop')}
-            >
+            <button className="btn btn-outline" onClick={() => playSound('boop')}>
               📺 Watch Videos
             </button>
           </div>
