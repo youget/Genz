@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import './globals.css';
 
 export default function Home() {
@@ -12,13 +13,10 @@ export default function Home() {
   const [joke, setJoke] = useState('');
   const [isClient, setIsClient] = useState(false);
 
-  // Fix hydration: set isClient only on client side
   useEffect(() => {
     setIsClient(true);
-    // Generate random friend count on client only
     setFriendCount(Math.floor(Math.random() * 1000) + 1);
     
-    // Generate random joke
     const jokes = [
       "Why did the Gen Z kid cross the road? To get to the other TikTok! 😂",
       "What's a Gen Z's favorite exercise? Scrolling! 💪",
@@ -32,7 +30,6 @@ export default function Home() {
     setJoke(jokes[Math.floor(Math.random() * jokes.length)]);
   }, []);
 
-  // Close dropdown on scroll/mouse move
   useEffect(() => {
     const handleActivity = () => {
       setIsDropdownOpen(false);
@@ -45,14 +42,12 @@ export default function Home() {
     };
   }, []);
 
-  // Play sound function (console only for now)
   const playSound = (soundName) => {
     if (isClient) {
       console.log(`Playing sound: ${soundName}`);
     }
   };
 
-  // Add love points
   const addLovePoints = () => {
     const points = Math.floor(Math.random() * 10) + 1;
     setLovePoints(prev => prev + points);
@@ -64,175 +59,60 @@ export default function Home() {
       
       {/* ========== NAVBAR ========== */}
       <nav className="navbar">
-        <div 
-          className="navbar-logo" 
-          onClick={() => {
-            setIsMenuOpen(false);
-            setIsDropdownOpen(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        >
+        <Link href="/" className="navbar-logo">
           <span className="navbar-logo-text">GenZee</span>
-        </div>
+        </Link>
         
         <div className="navbar-right">
           <button 
             className="theme-toggle-btn" 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsDarkMode(!isDarkMode);
-            }}
+            onClick={() => setIsDarkMode(!isDarkMode)}
             aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
             {isDarkMode ? '☀️' : '🌙'}
           </button>
           
-          {/* Desktop Dropdown Menu Trigger */}
           <button 
-            className="hamburger-btn desktop-trigger" 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsDropdownOpen(!isDropdownOpen);
-              setIsMenuOpen(false);
+            className="hamburger-btn" 
+            onClick={() => {
+              if (window.innerWidth <= 768) {
+                setIsMenuOpen(!isMenuOpen);
+                setIsDropdownOpen(false);
+              } else {
+                setIsDropdownOpen(!isDropdownOpen);
+                setIsMenuOpen(false);
+              }
             }}
-            aria-label="Open menu"
-            onMouseEnter={() => setIsDropdownOpen(true)}
+            aria-label="Toggle menu"
           >
-            ☰
-          </button>
-          
-          {/* Mobile Menu Trigger */}
-          <button 
-            className="hamburger-btn mobile-trigger" 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMenuOpen(!isMenuOpen);
-              setIsDropdownOpen(false);
-            }}
-            aria-label="Open menu"
-          >
-            {isMenuOpen ? '✕' : '☰'}
+            {isMenuOpen || isDropdownOpen ? '✕' : '☰'}
           </button>
         </div>
         
-        {/* Desktop Dropdown Menu */}
-        {isDropdownOpen && (
-          <div 
-            className="desktop-dropdown"
-            onMouseLeave={() => setIsDropdownOpen(false)}
-          >
+        {/* Desktop Dropdown */}
+        {isDropdownOpen && window.innerWidth > 768 && (
+          <div className="desktop-dropdown" onMouseLeave={() => setIsDropdownOpen(false)}>
             <ul className="dropdown-menu-list">
-              <li>
-                <a href="#home" onClick={() => setIsDropdownOpen(false)}>
-                  🏠 Home
-                </a>
-              </li>
-              <li>
-                <a href="#videos" onClick={() => setIsDropdownOpen(false)}>
-                  🎥 Videos
-                </a>
-                <ul className="dropdown-submenu">
-                  <li><a href="#youtube" onClick={() => setIsDropdownOpen(false)}>▶️ YouTube</a></li>
-                  <li><a href="#tiktok" onClick={() => setIsDropdownOpen(false)}>🎵 TikTok</a></li>
-                  <li><a href="#instagram" onClick={() => setIsDropdownOpen(false)}>📸 Instagram</a></li>
-                  <li><a href="#favorites" onClick={() => setIsDropdownOpen(false)}>❤️ Favorites</a></li>
-                </ul>
-              </li>
-              <li>
-                <a href="#ai" onClick={() => setIsDropdownOpen(false)}>
-                  🤖 AI Generator
-                </a>
-                <ul className="dropdown-submenu">
-                  <li><a href="#chat" onClick={() => setIsDropdownOpen(false)}>💬 Chat</a></li>
-                  <li><a href="#image" onClick={() => setIsDropdownOpen(false)}>🎨 Image</a></li>
-                  <li><a href="#video" onClick={() => setIsDropdownOpen(false)}>🎬 Video</a></li>
-                  <li><a href="#history" onClick={() => setIsDropdownOpen(false)}>📜 History</a></li>
-                </ul>
-              </li>
-              <li>
-                <a 
-                  href="https://google.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  🔗 Link (Google)
-                </a>
-              </li>
-              <li>
-                <a href="#translator" onClick={() => setIsDropdownOpen(false)}>
-                  🌐 Translator
-                </a>
-              </li>
+              <li><Link href="/" onClick={() => setIsDropdownOpen(false)}>🏠 Home</Link></li>
+              <li><Link href="/vibe" onClick={() => setIsDropdownOpen(false)}>✨ Vibe</Link></li>
+              <li><Link href="/ai" onClick={() => setIsDropdownOpen(false)}>🤖 AI Generator</Link></li>
             </ul>
           </div>
         )}
         
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div 
-            className="mobile-menu-overlay"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <div 
-              className="mobile-menu"
-              onClick={(e) => e.stopPropagation()}
-            >
+        {isMenuOpen && window.innerWidth <= 768 && (
+          <div className="mobile-menu-overlay" onClick={() => setIsMenuOpen(false)}>
+            <div className="mobile-menu" onClick={e => e.stopPropagation()}>
               <div className="mobile-menu-header">
                 <span className="mobile-menu-title">GenZee Menu</span>
-                <button 
-                  className="mobile-menu-close"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  ✕
-                </button>
+                <button className="mobile-menu-close" onClick={() => setIsMenuOpen(false)}>✕</button>
               </div>
-              
               <ul className="mobile-menu-list">
-                <li>
-                  <a href="#home" onClick={() => setIsMenuOpen(false)}>
-                    🏠 Home
-                  </a>
-                </li>
-                <li>
-                  <a href="#videos" onClick={() => setIsMenuOpen(false)}>
-                    🎥 Videos
-                  </a>
-                  <ul className="submenu">
-                    <li><a href="#youtube" onClick={() => setIsMenuOpen(false)}>▶️ YouTube</a></li>
-                    <li><a href="#tiktok" onClick={() => setIsMenuOpen(false)}>🎵 TikTok</a></li>
-                    <li><a href="#instagram" onClick={() => setIsMenuOpen(false)}>📸 Instagram</a></li>
-                    <li><a href="#favorites" onClick={() => setIsMenuOpen(false)}>❤️ Favorites</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="#ai" onClick={() => setIsMenuOpen(false)}>
-                    🤖 AI Generator
-                  </a>
-                  <ul className="submenu">
-                    <li><a href="#chat" onClick={() => setIsMenuOpen(false)}>💬 Chat</a></li>
-                    <li><a href="#image" onClick={() => setIsMenuOpen(false)}>🎨 Image</a></li>
-                    <li><a href="#video" onClick={() => setIsMenuOpen(false)}>🎬 Video</a></li>
-                    <li><a href="#history" onClick={() => setIsMenuOpen(false)}>📜 History</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a 
-                    href="https://google.com" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    🔗 Link (Google)
-                  </a>
-                </li>
-                <li>
-                  <a href="#translator" onClick={() => setIsMenuOpen(false)}>
-                    🌐 Translator
-                  </a>
-                </li>
+                <li><Link href="/" onClick={() => setIsMenuOpen(false)}>🏠 Home</Link></li>
+                <li><Link href="/vibe" onClick={() => setIsMenuOpen(false)}>✨ Vibe</Link></li>
+                <li><Link href="/ai" onClick={() => setIsMenuOpen(false)}>🤖 AI Generator</Link></li>
               </ul>
-              
               <div className="mobile-menu-footer">
                 <p>GenZee - Your Digital Playground</p>
               </div>
@@ -301,7 +181,6 @@ export default function Home() {
             Watch. Laugh. Share. Repeat!
           </p>
 
-          {/* Platform Icons */}
           <div className="platform-icons">
             <div className="platform-icon">
               <span className="icon">▶️</span>
@@ -321,7 +200,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Trending Videos */}
           <div className="trending-section">
             <h3 className="sub-title">Trending Now:</h3>
             <ul className="video-list">
@@ -421,7 +299,6 @@ export default function Home() {
             </ol>
           </div>
 
-          {/* Love Tiers */}
           <div className="love-tiers">
             <div className="tier-card">
               <div className="tier-icon">🥉</div>
@@ -445,7 +322,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Love Points Counter */}
           <div className="love-counter">
             <h3>Your Stats:</h3>
             <div className="stats-row">
@@ -525,7 +401,6 @@ export default function Home() {
             If you're still reading this, you're officially awesome! 🌟
           </p>
 
-          {/* Random Joke */}
           <div className="joke-box">
             <h3>Random Joke of the Day:</h3>
             <p className="joke-text">{joke}</p>
