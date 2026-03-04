@@ -1424,6 +1424,98 @@ main {
   font-size: 0.9rem;
 }
 
+/* TABS CONTAINER (Fix Responsive) */
+.tabs-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 600px; /* Samakan dengan search bar */
+  margin-left: auto;
+  margin-right: auto;
+  overflow-x: auto; /* Mode geser di mobile */
+  padding-bottom: 5px;
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+.tabs-container::-webkit-scrollbar {
+  display: none; /* Hide scrollbar Chrome/Safari */
+}
+
+.tab-btn {
+  flex: 1; /* Bagi rata */
+  min-width: 100px; /* Lebar minimal */
+  padding: 10px 15px;
+  border-radius: 30px;
+  border: 2px solid #7b61ff;
+  background: rgba(123, 97, 255, 0.1);
+  color: #7b61ff;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap; /* Jangan break text */
+  transition: all 0.3s ease;
+}
+.tab-btn.active, .tab-btn:hover {
+  background: #7b61ff;
+  color: white;
+}
+.dark-mode .tab-btn {
+  border-color: #4ecdc4;
+  color: #4ecdc4;
+  background: rgba(78, 205, 196, 0.1);
+}
+.dark-mode .tab-btn.active {
+  background: #4ecdc4;
+  color: #0f0f25;
+}
+
+/* MODAL CONTROLS FIX */
+.modal-content {
+  position: relative; /* Pastikan relatif terhadap overlay */
+  display: flex;
+  flex-direction: column;
+}
+.modal-controls {
+  position: relative; /* Muncul di bawah video tapi dalam flow */
+  z-index: 10;
+  background: rgba(0,0,0,0.8); /* Background gelap biar kelihatan */
+  backdrop-filter: blur(5px);
+  border-radius: 0 0 25px 25px;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+.modal-btn {
+  padding: 10px 20px;
+  font-size: 0.9rem; /* Lebih kecil */
+  min-width: auto;
+  flex: 0 1 auto; /* Tidak melebar penuh */
+}
+
+/* SCROLL TO TOP VISIBILITY */
+.scroll-to-top {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.scroll-to-top.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive Navbar Fix */
+@media (max-width: 768px) {
+  .tabs-container {
+    max-width: 100%; /* Full width di mobile */
+    padding: 0 20px; /* Padding samping */
+  }
+  .tab-btn {
+    min-width: 80px;
+    font-size: 0.85rem;
+  }
+}
+
 /* Animations */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
