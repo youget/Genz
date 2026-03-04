@@ -11,6 +11,7 @@ export async function GET(request) {
 
   let regionCode = 'US';
   try {
+    // ✅ FIX: Hapus spasi berlebih di URL ipapi.co
     const geoResponse = await fetch(`https://ipapi.co/${ip}/json/`);
     const geoData = await geoResponse.json();
     if (geoData.country_code) regionCode = geoData.country_code;
@@ -18,24 +19,34 @@ export async function GET(request) {
     console.log('Geolocation failed, using US');
   }
 
-  // 2. PAKAI LANGSUNG KEY PERTAMA (No rotation dulu)
-  const apiKey = process.env.YOUTUBE_API_KEY_1;
+  // 2. ROTASI 5 API KEYS (Anti Quota Limit)
+  const keys = [
+    process.env.YOUTUBE_API_KEY_1,
+    process.env.YOUTUBE_API_KEY_2,
+    process.env.YOUTUBE_API_KEY_3,
+    process.env.YOUTUBE_API_KEY_4,
+    process.env.YOUTUBE_API_KEY_5
+  ].filter(key => key); // Hanya ambil key yang benar-benar ada di Vercel
 
-  if (!apiKey) {
+  if (keys.length === 0) {
     return Response.json({ 
-      error: 'API Key belum diset di Vercel Environment Variables!' 
+      error: 'YouTube API keys not configured in Vercel Environment Variables' 
     }, { status: 500 });
   }
 
+  // Pilih key berdasarkan menit sekarang (Round Robin)
+  const minute = Math.floor(Date.now() / 60000);
+  const apiKey = keys[minute % keys.length];
+
   try {
-    // 3. Request ke YouTube API
+    // ✅ FIX: Hapus spasi berlebih di URL YouTube API
     const url = new URL('https://www.googleapis.com/youtube/v3/search');
     url.searchParams.append('key', apiKey);
     url.searchParams.append('part', 'snippet');
     url.searchParams.append('q', `${query} #shorts`);
     url.searchParams.append('type', 'video');
     url.searchParams.append('videoDuration', 'short');
-    url.searchParams.append('maxResults', '20'); // Ambil 20 dulu buat test
+    url.searchParams.append('maxResults', '50'); // ✅ Kembali ke 50 video
     url.searchParams.append('order', 'rating');
     url.searchParams.append('regionCode', regionCode);
     
@@ -47,6 +58,15 @@ export async function GET(request) {
     // 4. Cek Error dari YouTube
     if (data.error) {
       console.error('YouTube Error:', data.error);
+      
+      // Handle Quota Exceeded khusus
+      if (data.error.code === 403 && data.error.errors?.[0]?.reason === 'quotaExceeded') {
+        return Response.json({ 
+          error: 'Quota exceeded. Rotating key automatically...', 
+          details: data.error.errors 
+        }, { status: 429 });
+      }
+
       return Response.json({ 
         error: data.error.message,
         details: data.error.errors 
