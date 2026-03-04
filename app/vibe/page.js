@@ -16,23 +16,66 @@ export default function VibePage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [openSubmenu, setOpenSubmenu] = useState(null);
-
-  // Search & Data State
-  const [searchInput, setSearchInput] = useState(''); // Input user (belum di submit)
-  const [searchQuery, setSearchQuery] = useState('shorts viral'); // Query aktif untuk API
+  
+  // Search State
+  const [searchInput, setSearchInput] = useState(''); // Apa yang diketik user
+  const [searchQuery, setSearchQuery] = useState('shorts viral'); // Query aktif yang diproses
+  
+  // Data State
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Default false biar gak loading di awal jika ada cache
   const [error, setError] = useState(null);
   const [pageToken, setPageToken] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [region, setRegion] = useState('ID');
 
-  // Fetch Function
-  const fetchVideos = async (query, token = null) => {
+  // --- FUNGSI CACHE HELPER ---
+  const getCacheKey = (query) => `genzee_cache_${query.toLowerCase().trim()}`;
+  
+  const getCachedData = (key) => {
+    if (typeof window === 'undefined') return null;
+    const item = localStorage.getItem(key);
+    if (!item) return null;
+    
+    const { data, timestamp } = JSON.parse(item);
+    const now = new Date().getTime();
+    // 24 Jam = 24 * 60 * 60 * 1000 ms
+    if (now - timestamp > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(key); // Expired
+      return null;
+    }
+    return data;
+  };
+
+  const setCacheData = (key, data) => {
+    if (typeof window === 'undefined') return;
+    const item = {
+      data,
+      timestamp: new Date().getTime(),
+    };
+    localStorage.setItem(key, JSON.stringify(item));
+  };
+
+  // --- FUNGSI FETCH UTAMA ---
+  const fetchVideos = async (query, token = null, isLoadMore = false) => {
+    // 1. Cek Cache HANYA jika ini search baru (bukan load more)
+    if (!token && !isLoadMore) {
+      const cached = getCachedData(getCacheKey(query));
+      if (cached) {
+        console.log('✅ Loaded from Cache (24h):', query);
+        setVideos(cached.videos);
+        setPageToken(cached.nextPageToken);
+        setHasMore(!!cached.nextPageToken);
+        setRegion(cached.region || 'ID');
+        setLoading(false);
+        return; // Stop here, gak perlu hit API
+      }
+    }
+
     setLoading(true);
     setError(null);
+
     try {
       const url = `/api/youtube?q=${encodeURIComponent(query)}${token ? `&pageToken=${token}` : ''}`;
       const res = await fetch(url);
@@ -40,47 +83,72 @@ export default function VibePage() {
       
       if (data.error) throw new Error(data.error);
       
-      setVideos(prev => token ? [...prev, ...data.videos] : data.videos);
+      const newVideos = data.videos;
+      
+      // Update State
+      setVideos(prev => (token || isLoadMore) ? [...prev, ...newVideos] : newVideos);
       setPageToken(data.nextPageToken);
       setHasMore(!!data.nextPageToken);
-      setRegion(data.region || 'global');
+      setRegion(data.region || 'ID');
       
-      if (!token && data.videos.length === 0) {
+      // 2. Simpan ke Cache HANYA jika ini hasil awal (bukan load more)
+      if (!token && !isLoadMore) {
+        setCacheData(getCacheKey(query), {
+          videos: newVideos,
+          nextPageToken: data.nextPageToken,
+          region: data.region
+        });
+        console.log('💾 Saved to Cache (24h):', query);
+      }
+
+      if (!token && !isLoadMore && newVideos.length === 0) {
         setError(`No vibes found for "${query}" 😕`);
       }
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || 'Failed to load vibes');
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial Load
+  // Initial Load (Hanya sekali saat halaman dibuka pertama kali)
   useEffect(() => {
-    fetchVideos(searchQuery);
-  }, []); // Only run once on mount
+    // Cek cache untuk default query 'shorts viral'
+    fetchVideos('shorts viral');
+  }, []);
 
-  // Handle Submit (ENTER or Click)
+  // Handle Submit (ENTER atau Klik Kaca Pembesar)
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchInput.trim()) return;
     
+    // Reset state untuk search baru
     setVideos([]);
     setPageToken(null);
-    setSearchQuery(searchInput.trim());
-    // Trigger fetch manually because useEffect dependency is removed to prevent auto-fetch on type
-    fetchVideos(searchInput.trim());
+    setHasMore(true);
+    setError(null);
+    
+    // Set query aktif dan trigger fetch
+    const finalQuery = searchInput.trim();
+    setSearchQuery(finalQuery);
+    fetchVideos(finalQuery);
   };
 
   const handleLoadMore = () => {
-    if (pageToken) fetchVideos(searchQuery, pageToken);
+    if (pageToken) fetchVideos(searchQuery, pageToken, true);
   };
 
-  const toggleSubmenu = (name) => setOpenSubmenu(openSubmenu === name ? null : name);
+  const handleChipClick = (chip) => {
+    setSearchInput(chip);
+    setVideos([]);
+    setPageToken(null);
+    fetchVideos(chip);
+  };
 
   return (
     <div className={`container ${isDarkMode ? 'dark-mode' : ''}`}>
-      {/* Navbar (Same structure as Home, simplified for brevity) */}
+      {/* Navbar Sederhana */}
       <nav className="navbar">
         <Link href="/" className="navbar-logo"><span className="navbar-logo-text">GenZee</span></Link>
         <div className="navbar-right">
@@ -88,7 +156,7 @@ export default function VibePage() {
           <button className="hamburger-btn mobile-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? '✕' : '☰'}</button>
           <button className="hamburger-btn desktop-trigger" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>☰</button>
         </div>
-        {/* Add Dropdown/Mobile Menu logic here similar to Home page */}
+        
         {isDropdownOpen && (
            <div className="desktop-dropdown" onMouseLeave={() => setIsDropdownOpen(false)}>
              <ul className="dropdown-menu-list">
@@ -124,6 +192,7 @@ export default function VibePage() {
             <button className="btn btn-outline" style={{padding:'8px 20px', fontSize:'0.9rem'}} onClick={()=>alert('Instagram Coming Soon! 🚧')}>Instagram</button>
           </div>
 
+          {/* SEARCH BAR (ON SUBMIT ONLY) */}
           <div className="search-container">
             <form onSubmit={handleSearch} className="search-form">
               <input
@@ -139,7 +208,7 @@ export default function VibePage() {
           
           <div className="trending-chips">
             {['funny', 'animals', 'ai', 'dance', 'gaming'].map(chip => (
-              <button key={chip} className="chip" onClick={() => { setSearchInput(chip); setSearchQuery(chip); setVideos([]); fetchVideos(chip); }}>#{chip}</button>
+              <button key={chip} className="chip" onClick={() => handleChipClick(chip)}>#{chip}</button>
             ))}
           </div>
         </div>
@@ -235,7 +304,7 @@ export default function VibePage() {
         </div>
       )}
 
-      {/* New Footer */}
+      {/* Footer */}
       <footer className="site-footer">
         <div className="footer-content">
           <div className="footer-section"><h4>✨ GenZee Vibe</h4><p>Best shorts curated for you.</p></div>
