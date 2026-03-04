@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-// Data Video Channel Kamu (Ganti ID nya nanti!)
+// Data Video Channel Kamu
 const MY_CHANNEL_VIDEOS = [
   { id: 'Re3-ngqr6LU', title: 'Ranking Best Funny Moments', thumb: 'https://i.ytimg.com/vi/Re3-ngqr6LU/mqdefault.jpg' },
   { id: 'VIDEO_ID_2', title: 'My Latest Vlog', thumb: 'https://via.placeholder.com/320x180?text=Video+2' },
@@ -16,199 +16,269 @@ export default function VibePage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
-  // Search State
-  const [searchInput, setSearchInput] = useState(''); // Apa yang diketik user
-  const [searchQuery, setSearchQuery] = useState('shorts viral'); // Query aktif yang diproses
-  
-  // Data State
+  const [openSubmenu, setOpenSubmenu] = useState(null);
+  const [showTranslator, setShowTranslator] = useState(false);
+  const [currentLang, setCurrentLang] = useState('en');
+
+  // Search & Data State
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('shorts viral');
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(false); // Default false biar gak loading di awal jika ada cache
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [pageToken, setPageToken] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [region, setRegion] = useState('ID');
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // --- FUNGSI CACHE HELPER ---
-  const getCacheKey = (query) => `genzee_cache_${query.toLowerCase().trim()}`;
-  
+  // --- CACHE HELPER ---
+  const getCacheKey = (q) => `genzee_cache_${q.toLowerCase().trim()}`;
   const getCachedData = (key) => {
     if (typeof window === 'undefined') return null;
     const item = localStorage.getItem(key);
     if (!item) return null;
-    
     const { data, timestamp } = JSON.parse(item);
-    const now = new Date().getTime();
-    // 24 Jam = 24 * 60 * 60 * 1000 ms
-    if (now - timestamp > 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(key); // Expired
+    if (new Date().getTime() - timestamp > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(key);
       return null;
     }
     return data;
   };
-
   const setCacheData = (key, data) => {
     if (typeof window === 'undefined') return;
-    const item = {
-      data,
-      timestamp: new Date().getTime(),
-    };
-    localStorage.setItem(key, JSON.stringify(item));
+    localStorage.setItem(key, JSON.stringify({ data, timestamp: new Date().getTime() }));
   };
 
-  // --- FUNGSI FETCH UTAMA ---
-  const fetchVideos = async (query, token = null, isLoadMore = false) => {
-    // 1. Cek Cache HANYA jika ini search baru (bukan load more)
-    if (!token && !isLoadMore) {
+  // --- FETCH ---
+  const fetchVideos = async (query, token = null) => {
+    if (!token) {
       const cached = getCachedData(getCacheKey(query));
       if (cached) {
-        console.log('✅ Loaded from Cache (24h):', query);
         setVideos(cached.videos);
         setPageToken(cached.nextPageToken);
         setHasMore(!!cached.nextPageToken);
         setRegion(cached.region || 'ID');
         setLoading(false);
-        return; // Stop here, gak perlu hit API
+        return;
       }
     }
 
     setLoading(true);
     setError(null);
-
     try {
       const url = `/api/youtube?q=${encodeURIComponent(query)}${token ? `&pageToken=${token}` : ''}`;
       const res = await fetch(url);
       const data = await res.json();
-      
       if (data.error) throw new Error(data.error);
-      
-      const newVideos = data.videos;
-      
-      // Update State
-      setVideos(prev => (token || isLoadMore) ? [...prev, ...newVideos] : newVideos);
+
+      setVideos(prev => token ? [...prev, ...data.videos] : data.videos);
       setPageToken(data.nextPageToken);
       setHasMore(!!data.nextPageToken);
       setRegion(data.region || 'ID');
-      
-      // 2. Simpan ke Cache HANYA jika ini hasil awal (bukan load more)
-      if (!token && !isLoadMore) {
-        setCacheData(getCacheKey(query), {
-          videos: newVideos,
-          nextPageToken: data.nextPageToken,
-          region: data.region
-        });
-        console.log('💾 Saved to Cache (24h):', query);
-      }
 
-      if (!token && !isLoadMore && newVideos.length === 0) {
-        setError(`No vibes found for "${query}" 😕`);
-      }
+      if (!token) setCacheData(getCacheKey(query), {
+        videos: data.videos,
+        nextPageToken: data.nextPageToken,
+        region: data.region
+      });
+
+      if (!token && data.videos.length === 0) setError(`No vibes found for "${query}" 😕`);
     } catch (err) {
-      console.error(err);
-      setError(err.message || 'Failed to load vibes');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial Load (Hanya sekali saat halaman dibuka pertama kali)
   useEffect(() => {
-    // Cek cache untuk default query 'shorts viral'
     fetchVideos('shorts viral');
+    const handleScroll = () => setShowScrollTop(window.pageYOffset > 300);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Handle Submit (ENTER atau Klik Kaca Pembesar)
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchInput.trim()) return;
-    
-    // Reset state untuk search baru
     setVideos([]);
     setPageToken(null);
-    setHasMore(true);
-    setError(null);
-    
-    // Set query aktif dan trigger fetch
-    const finalQuery = searchInput.trim();
-    setSearchQuery(finalQuery);
-    fetchVideos(finalQuery);
+    const q = searchInput.trim();
+    setSearchQuery(q);
+    fetchVideos(q);
   };
 
   const handleLoadMore = () => {
-    if (pageToken) fetchVideos(searchQuery, pageToken, true);
+    if (pageToken) fetchVideos(searchQuery, pageToken);
   };
 
-  const handleChipClick = (chip) => {
-    setSearchInput(chip);
-    setVideos([]);
-    setPageToken(null);
-    fetchVideos(chip);
+  const toggleSubmenu = (name) => setOpenSubmenu(openSubmenu === name ? null : name);
+
+  // --- TRANSLATOR CONTENT ---
+  const t = {
+    en: { vibe: "✨ Vibe", ai: "🤖 AI", fav: "❤️ Favorite", link: "🔗 Link" },
+    id: { vibe: "✨ Vibe", ai: "🤖 AI", fav: "❤️ Favorit", link: "🔗 Link" }
   };
+  const content = t[currentLang] || t.en;
 
   return (
     <div className={`container ${isDarkMode ? 'dark-mode' : ''}`}>
-      {/* Navbar Sederhana */}
+      
+      {/* NAVBAR LENGKAP & STICKY */}
       <nav className="navbar">
-        <Link href="/" className="navbar-logo"><span className="navbar-logo-text">GenZee</span></Link>
-        <div className="navbar-right">
-          <button className="theme-toggle-btn" onClick={() => setIsDarkMode(!isDarkMode)}>{isDarkMode ? '☀️' : '🌙'}</button>
-          <button className="hamburger-btn mobile-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? '✕' : '☰'}</button>
-          <button className="hamburger-btn desktop-trigger" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>☰</button>
-        </div>
+        <Link href="/" className="navbar-logo">
+          <span className="navbar-logo-text">GenZee</span>
+        </Link>
         
+        <div className="navbar-right">
+          <button className="theme-toggle-btn" onClick={() => setIsDarkMode(!isDarkMode)}>
+            {isDarkMode ? '☀️' : '🌙'}
+          </button>
+          <button className="translate-btn" onClick={() => setShowTranslator(true)}>
+            🌐
+          </button>
+          
+          <button className="hamburger-btn mobile-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            {isMenuOpen ? '✕' : '☰'}
+          </button>
+          <button className="hamburger-btn desktop-trigger" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+            ☰
+          </button>
+        </div>
+
+        {/* Desktop Dropdown */}
         {isDropdownOpen && (
-           <div className="desktop-dropdown" onMouseLeave={() => setIsDropdownOpen(false)}>
-             <ul className="dropdown-menu-list">
-               <li><Link href="/" onClick={()=>setIsDropdownOpen(false)}>🏠 Home</Link></li>
-               <li><Link href="/vibe" onClick={()=>setIsDropdownOpen(false)}>✨ Vibe</Link></li>
-               <li><Link href="/ai" onClick={()=>setIsDropdownOpen(false)}>🤖 AI</Link></li>
-             </ul>
-           </div>
+          <div className="desktop-dropdown" onMouseLeave={() => { setIsDropdownOpen(false); setOpenSubmenu(null); }}>
+            <ul className="dropdown-menu-list">
+              <li><Link href="/" onClick={()=>setIsDropdownOpen(false)}>🏠 Home</Link></li>
+              <li>
+                <button className="submenu-toggle" onClick={() => toggleSubmenu('vibe')}>
+                  {content.vibe} {openSubmenu === 'vibe' ? '▲' : '▼'}
+                </button>
+                {openSubmenu === 'vibe' && (
+                  <ul className="dropdown-submenu active">
+                    <li><Link href="/vibe?src=yt">▶️ YouTube</Link></li>
+                    <li><a href="#" onClick={(e)=>{e.preventDefault();alert('TikTok Soon!')}}>🎵 TikTok</a></li>
+                    <li><a href="#" onClick={(e)=>{e.preventDefault();alert('IG Soon!')}}>📸 Instagram</a></li>
+                  </ul>
+                )}
+              </li>
+              <li>
+                <button className="submenu-toggle" onClick={() => toggleSubmenu('ai')}>
+                  {content.ai} {openSubmenu === 'ai' ? '▲' : '▼'}
+                </button>
+                {openSubmenu === 'ai' && (
+                  <ul className="dropdown-submenu active">
+                    <li><Link href="/ai?type=chat">💬 Chat</Link></li>
+                    <li><Link href="/ai?type=image">🎨 Image</Link></li>
+                    <li><Link href="/ai?type=video">🎬 Video</Link></li>
+                  </ul>
+                )}
+              </li>
+              <li>
+                <button className="submenu-toggle" onClick={() => toggleSubmenu('fav')}>
+                  {content.fav} {openSubmenu === 'fav' ? '▲' : '▼'}
+                </button>
+                {openSubmenu === 'fav' && (
+                  <ul className="dropdown-submenu active">
+                    <li><Link href="/fav?vibe">Vibe Saves</Link></li>
+                    <li><Link href="/fav?ai">AI Creations</Link></li>
+                  </ul>
+                )}
+              </li>
+              <li><a href="https://pollinations.ai" target="_blank">{content.link}</a></li>
+            </ul>
+          </div>
         )}
+
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="mobile-menu-overlay" onClick={()=>setIsMenuOpen(false)}>
-            <div className="mobile-menu" onClick={e=>e.stopPropagation()}>
-              <div className="mobile-menu-header"><span>Menu</span><button onClick={()=>setIsMenuOpen(false)}>✕</button></div>
+          <div className="mobile-menu-overlay" onClick={() => setIsMenuOpen(false)}>
+            <div className="mobile-menu" onClick={e => e.stopPropagation()}>
+              <div className="mobile-menu-header">
+                <span className="mobile-menu-title">Menu</span>
+                <button className="mobile-menu-close" onClick={() => setIsMenuOpen(false)}>✕</button>
+              </div>
               <ul className="mobile-menu-list">
                 <li><Link href="/" onClick={()=>setIsMenuOpen(false)}>🏠 Home</Link></li>
-                <li><Link href="/vibe" onClick={()=>setIsMenuOpen(false)}>✨ Vibe</Link></li>
-                <li><Link href="/ai" onClick={()=>setIsMenuOpen(false)}>🤖 AI</Link></li>
+                <li>
+                  <button className="mobile-submenu-toggle" onClick={() => toggleSubmenu('vibe')}>
+                    {content.vibe} {openSubmenu === 'vibe' ? '▲' : '▼'}
+                  </button>
+                  {openSubmenu === 'vibe' && (
+                    <ul className="submenu active">
+                      <li><Link href="/vibe?src=yt">▶️ YouTube</Link></li>
+                      <li><a href="#" onClick={(e)=>{e.preventDefault();alert('TikTok Soon!')}}>🎵 TikTok</a></li>
+                      <li><a href="#" onClick={(e)=>{e.preventDefault();alert('IG Soon!')}}>📸 Instagram</a></li>
+                    </ul>
+                  )}
+                </li>
+                <li>
+                  <button className="mobile-submenu-toggle" onClick={() => toggleSubmenu('ai')}>
+                    {content.ai} {openSubmenu === 'ai' ? '▲' : '▼'}
+                  </button>
+                  {openSubmenu === 'ai' && (
+                    <ul className="submenu active">
+                      <li><Link href="/ai?type=chat">💬 Chat</Link></li>
+                      <li><Link href="/ai?type=image">🎨 Image</Link></li>
+                      <li><Link href="/ai?type=video">🎬 Video</Link></li>
+                    </ul>
+                  )}
+                </li>
+                <li>
+                  <button className="mobile-submenu-toggle" onClick={() => toggleSubmenu('fav')}>
+                    {content.fav} {openSubmenu === 'fav' ? '▲' : '▼'}
+                  </button>
+                  {openSubmenu === 'fav' && (
+                    <ul className="submenu active">
+                      <li><Link href="/fav?vibe">Vibe Saves</Link></li>
+                      <li><Link href="/fav?ai">AI Creations</Link></li>
+                    </ul>
+                  )}
+                </li>
+                <li><a href="https://pollinations.ai" target="_blank">{content.link}</a></li>
               </ul>
             </div>
           </div>
         )}
       </nav>
 
+      {/* TRANSLATOR MODAL */}
+      {showTranslator && (
+        <div className="translator-modal" onClick={() => setShowTranslator(false)}>
+          <div className="translator-box" onClick={e => e.stopPropagation()}>
+            <button className="close-translator" onClick={() => setShowTranslator(false)}>✕</button>
+            <h3>🌐 Select Language</h3>
+            <select className="lang-select" value={currentLang} onChange={(e) => setCurrentLang(e.target.value)}>
+              <option value="en">English</option>
+              <option value="id">Bahasa Indonesia</option>
+            </select>
+          </div>
+        </div>
+      )}
+
       <main className="vibe-page">
         <div className="vibe-header">
-          <h1 className="vibe-title">✨ Vibe For You ({region.toUpperCase()}) 🇮🇩</h1>
-          <p className="vibe-subtitle">Curated shorts just for your region!</p>
+          <h1 className="vibe-title">✨ Vibe For You</h1>
+          <p className="vibe-subtitle">Curated shorts just for you!</p>
           
-          {/* Tabs Gimmick */}
-          <div style={{display:'flex', justifyContent:'center', gap:'10px', marginBottom:'20px'}}>
-            <button className="btn btn-primary" style={{padding:'8px 20px', fontSize:'0.9rem'}}>YouTube</button>
-            <button className="btn btn-outline" style={{padding:'8px 20px', fontSize:'0.9rem'}} onClick={()=>alert('TikTok Coming Soon! 🚧')}>TikTok</button>
-            <button className="btn btn-outline" style={{padding:'8px 20px', fontSize:'0.9rem'}} onClick={()=>alert('Instagram Coming Soon! 🚧')}>Instagram</button>
+          {/* TABS MODE GESER (MOBILE) / RAPI (DESKTOP) */}
+          <div className="tabs-container">
+            <button className="tab-btn active">YouTube</button>
+            <button className="tab-btn" onClick={()=>alert('TikTok Coming Soon! 🚧')}>TikTok</button>
+            <button className="tab-btn" onClick={()=>alert('Instagram Coming Soon! 🚧')}>Instagram</button>
           </div>
 
-          {/* SEARCH BAR (ON SUBMIT ONLY) */}
           <div className="search-container">
             <form onSubmit={handleSearch} className="search-form">
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Search vibe (e.g., mukbang, cats)..."
-                className="search-input"
-              />
+              <input type="text" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search vibe..." className="search-input" />
               <button type="submit" className="search-btn">🔍</button>
             </form>
           </div>
           
           <div className="trending-chips">
-            {['funny', 'animals', 'ai', 'dance', 'gaming'].map(chip => (
-              <button key={chip} className="chip" onClick={() => handleChipClick(chip)}>#{chip}</button>
+            {['funny', 'cats', 'ai', 'dance', 'gaming'].map(chip => (
+              <button key={chip} className="chip" onClick={() => { setSearchInput(chip); fetchVideos(chip); }}>#{chip}</button>
             ))}
           </div>
         </div>
@@ -218,83 +288,45 @@ export default function VibePage() {
         {loading && videos.length === 0 ? (
           <div className="loading-grid">{[...Array(6)].map((_, i) => <div key={i} className="skeleton-card"></div>)}</div>
         ) : !loading && videos.length === 0 && !error ? (
-          <div className="no-more-videos">😕 Start searching to find vibes!</div>
+          <div className="no-more-videos">😕 Start searching!</div>
         ) : (
           <div className="videos-grid">
             {videos.map((video, index) => {
-              const isAdSlot = (index + 1) % 10 === 0;
-              const isCreatorSlot = (index + 1) % 5 === 0 && !isAdSlot;
-
-              if (isAdSlot) {
-                return (
-                  <div key={`ad-${index}`} className="video-card ad-card">
-                    <div className="thumbnail-container">
-                      <img src={`https://via.placeholder.com/320x568/ff6b6b/ffffff?text=ADS+${Math.floor(index/10)+1}`} alt="Ad" className="thumbnail" />
-                      <div className="video-duration" style={{background:'#ff4757'}}>ADS</div>
-                    </div>
-                    <div className="video-info">
-                      <h3 className="video-title">🔥 Special Offer Just For You!</h3>
-                      <a href="https://google.com" target="_blank" className="btn-small">Visit Now →</a>
-                    </div>
-                  </div>
-                );
-              }
-
-              if (isCreatorSlot) {
-                return (
-                  <div key={`creator-${index}`} className="video-card creator-card">
-                    <div className="thumbnail-container">
-                      <img src={MY_CHANNEL_VIDEOS[0].thumb} alt="Creator" className="thumbnail" style={{opacity:0.8}} />
-                      <div className="video-duration" style={{background:'#7b61ff'}}>🔥 CREATOR'S PICK</div>
-                    </div>
-                    <div className="video-info">
-                      <h3 className="video-title" style={{color:'#7b61ff'}}>✨ My Latest Shorts!</h3>
-                      <div style={{display:'flex', gap:'5px', overflowX:'auto', padding:'5px 0'}}>
-                        {MY_CHANNEL_VIDEOS.slice(0,3).map((v,i) => (
-                          <a key={i} href={`https://youtube.com/shorts/${v.id}`} target="_blank">
-                            <img src={v.thumb} style={{width:'50px', borderRadius:'4px'}} alt="" />
-                          </a>
-                        ))}
-                      </div>
-                      <a href="https://youtube.com/@YOUR_CHANNEL" target="_blank" className="btn-small">Subscribe ❤️</a>
-                    </div>
-                  </div>
-                );
-              }
-
+              const isAd = (index + 1) % 10 === 0;
+              const isCreator = (index + 1) % 5 === 0 && !isAd;
+              if (isAd) return (
+                <div key={index} className="video-card ad-card">
+                  <div className="thumbnail-container"><img src="https://via.placeholder.com/320x568?text=ADS" className="thumbnail"/><div className="video-duration">ADS</div></div>
+                  <div className="video-info"><h3 className="video-title">Special Offer!</h3><a href="#" className="btn-small">Visit →</a></div>
+                </div>
+              );
+              if (isCreator) return (
+                <div key={index} className="video-card creator-card">
+                  <div className="thumbnail-container"><img src={MY_CHANNEL_VIDEOS[0].thumb} className="thumbnail"/><div className="video-duration">CREATOR</div></div>
+                  <div className="video-info"><h3 className="video-title">My Latest Shorts!</h3><a href="#" className="btn-small">Subscribe ❤️</a></div>
+                </div>
+              );
               return (
                 <div key={video.id} className="video-card" onClick={() => setSelectedVideo(video)}>
-                  <div className="thumbnail-container">
-                    <img src={video.thumbnail} alt={video.title} className="thumbnail" loading="lazy" />
-                    <div className="video-duration">0:{Math.floor(Math.random()*55)+5}</div>
-                  </div>
-                  <div className="video-info">
-                    <h3 className="video-title">{video.title}</h3>
-                    <div className="channel-info">
-                      <span>{video.channel}</span>
-                      <span>{Math.floor(Math.random()*900)+100}K views</span>
-                    </div>
-                  </div>
+                  <div className="thumbnail-container"><img src={video.thumbnail} className="thumbnail" loading="lazy"/><div className="video-duration">0:{Math.floor(Math.random()*55)+5}</div></div>
+                  <div className="video-info"><h3 className="video-title">{video.title}</h3><div className="channel-info"><span>{video.channel}</span><span>Views</span></div></div>
                 </div>
               );
             })}
           </div>
         )}
 
-        {hasMore && !loading && (
-          <div className="load-more-container">
-            <button className="load-more-btn" onClick={handleLoadMore} disabled={loading}>⬇️ Load More Vibe</button>
-          </div>
-        )}
+        {hasMore && !loading && <div className="load-more-container"><button className="load-more-btn" onClick={handleLoadMore}>⬇️ Load More</button></div>}
       </main>
 
-      {/* Modal Video */}
+      {/* VIDEO MODAL (FIXED CONTROLS) */}
       {selectedVideo && (
         <div className="modal-overlay" onClick={() => setSelectedVideo(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="video-player">
-              <iframe src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1`} frameBorder="0" allowFullScreen></iframe>
+              <iframe src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1`} frameBorder="0" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
             </div>
+            {/* Controls Always Visible */}
             <div className="modal-controls">
               <button className="modal-btn share-btn">📤 Share</button>
               <button className="modal-btn close-btn" onClick={() => setSelectedVideo(null)}>✕ Close</button>
@@ -304,14 +336,19 @@ export default function VibePage() {
         </div>
       )}
 
-      {/* Footer */}
+      {/* SCROLL TO TOP */}
+      {showScrollTop && (
+        <button className="scroll-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>↑</button>
+      )}
+
+      {/* FOOTER */}
       <footer className="site-footer">
         <div className="footer-content">
-          <div className="footer-section"><h4>✨ GenZee Vibe</h4><p>Best shorts curated for you.</p></div>
+          <div className="footer-section"><h4>GenZee</h4><p>Vibe Curated.</p></div>
           <div className="footer-section"><h4>Links</h4><ul><li><Link href="/">Home</Link></li><li><Link href="/vibe">Vibe</Link></li></ul></div>
           <div className="footer-section"><h4>Legal</h4><ul><li><Link href="/privacy">Privacy</Link></li><li><Link href="/disclaimer">Disclaimer</Link></li></ul></div>
         </div>
-        <div className="footer-bottom"><p>&copy; {new Date().getFullYear()} GenZee. All rights reserved.</p></div>
+        <div className="footer-bottom"><p>&copy; 2026 GenZee.</p></div>
       </footer>
     </div>
   );
