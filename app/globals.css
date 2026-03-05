@@ -1222,43 +1222,42 @@ main {
   box-shadow: 0 6px 20px rgba(123, 97, 255, 0.5);
 }
 
-/* Video Modal */
+/* ========== MODAL VIDEO FIX ========== */
+
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0, 0, 0, 0.9);
   z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.3s ease;
   padding: 20px;
+  animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
   width: 100%;
   max-width: 900px;
   background: white;
-  border-radius: 25px;
+  border-radius: 20px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
 }
 
 .dark-mode .modal-content {
-  background: #0a0a1a;
+  background: #1a1a2e;
+  color: white;
 }
 
 .video-player {
-  position: relative;
+  position: relative; /* Penting untuk absolute positioning tombol */
   width: 100%;
-  padding-top: 56.25%; /* 16:9 */
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
   background: #000;
 }
 
@@ -1271,46 +1270,104 @@ main {
   border: none;
 }
 
-.modal-controls {
+/* FLOATING CONTROLS (Baru & Improved) */
+.modal-controls-floating {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.05);
-  gap: 15px;
-}
-
-.dark-mode .modal-controls {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.modal-btn {
-  background: linear-gradient(45deg, #7b61ff, #4ecdc4);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 700;
+  gap: 10px;
+  z-index: 100; /* Di atas iframe */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  padding: 8px;
   border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Icon Buttons Only (Compact) */
+.modal-btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
-  flex: 1;
-  max-width: 150px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  transition: all 0.2s ease;
+  color: white;
+  flex-shrink: 0; /* Agar tidak mengecil */
 }
 
-.modal-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+.modal-btn-icon:hover {
+  transform: scale(1.1);
+  background: rgba(255,255,255,0.2);
 }
 
 .share-btn { background: linear-gradient(45deg, #ff6b6b, #ffa500); }
 .favorite-btn { background: linear-gradient(45deg, #ff69b4, #ff1493); }
-.close-btn { background: linear-gradient(45deg, #6a51e6, #4ecdc4); max-width: 120px; }
+.close-btn { background: linear-gradient(45deg, #6a51e6, #4ecdc4); }
+
+/* Modal Info Text */
+.modal-info {
+  padding: 20px;
+  text-align: left;
+}
+
+.modal-video-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.modal-channel-name {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.dark-mode .modal-channel-name {
+  color: #aaa;
+}
+
+/* Responsive Mobile Fix */
+@media (max-width: 768px) {
+  .modal-content {
+    max-height: 100vh;
+    height: 100%;
+    border-radius: 0;
+  }
+  
+  .modal-controls-floating {
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%); /* Tengah di bawah */
+    width: auto;
+    justify-content: center;
+    padding: 10px 20px;
+  }
+  
+  .modal-btn-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+  
+  .modal-info {
+    padding: 15px;
+  }
+  
+  .modal-video-title {
+    font-size: 1rem;
+  }
+}
 
 /* Translator Modal */
 .translator-modal {
