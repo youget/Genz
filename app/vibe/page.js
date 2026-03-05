@@ -319,47 +319,44 @@ export default function VibePage() {
         {hasMore && !loading && <div className="load-more-container"><button className="load-more-btn" onClick={handleLoadMore}>⬇️ Load More</button></div>}
       </main>
 
-            {/* VIDEO MODAL WITH FLOATING CONTROLS */}
+                  {/* VIDEO MODAL WITH CUSTOM FULLSCREEN */}
       {selectedVideo && (
-        <div className="modal-overlay" onClick={() => setSelectedVideo(null)}>
+        <div className={`modal-overlay ${isModalFull ? 'modal-fullscreen-active' : ''}`} onClick={() => !isModalFull && setSelectedVideo(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             
-            {/* Video Player */}
-            <div className="video-player">
-              <iframe 
-                src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0&modestbranding=1`} 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowFullScreen
-                title={selectedVideo.title}
-              ></iframe>
-              
-              {/* FLOATING CONTROLS (Selalu Muncul di Atas Video) */}
-              <div className="modal-controls-floating">
-                <button className="modal-btn-icon share-btn" title="Share" onClick={(e) => {
+            {/* Header Modal (Optional, bisa buat judul) */}
+            <div className="modal-header">
+              <h3 className="modal-video-title">{selectedVideo.title}</h3>
+              <button 
+                className="modal-expand-btn" 
+                onClick={(e) => {
                   e.stopPropagation();
-                  alert('Link copied to clipboard! 📋'); // Simulasi share
-                }}>
-                  📤
-                </button>
-                
-                <button className="modal-btn-icon close-btn" title="Close" onClick={() => setSelectedVideo(null)}>
-                  ✕
-                </button>
-                
-                <button className="modal-btn-icon favorite-btn" title="Favorite" onClick={(e) => {
-                  e.stopPropagation();
-                  alert('Added to favorites! ❤️'); // Simulasi fav
-                }}>
-                  ❤️
-                </button>
-              </div>
+                  setIsModalFull(!isModalFull);
+                }}
+                title={isModalFull ? "Exit Fullscreen" : "Full Screen"}
+              >
+                {isModalFull ? '🔽' : '🔲'}
+              </button>
             </div>
 
-            {/* Info Video (Opsional, muncul di bawah video tapi di dalam modal) */}
-            <div className="modal-info">
-              <h3 className="modal-video-title">{selectedVideo.title}</h3>
-              <p className="modal-channel-name">{selectedVideo.channel}</p>
+            {/* Video Player Area */}
+            <div className="video-player-wrapper">
+              <div className="video-player">
+                <iframe 
+                  src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0&modestbranding=1`} 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen // Biarkan native fullscreen tetap ada sebagai opsi cadangan
+                  title={selectedVideo.title}
+                ></iframe>
+              </div>
+              
+              {/* Floating Controls (Selalu di bawah video, di dalam wrapper) */}
+              <div className="modal-controls-floating">
+                <button className="modal-btn-icon share-btn" onClick={(e) => { e.stopPropagation(); alert('Shared! 📤'); }}>📤</button>
+                <button className="modal-btn-icon close-btn" onClick={() => setSelectedVideo(null)}>✕</button>
+                <button className="modal-btn-icon favorite-btn" onClick={(e) => { e.stopPropagation(); alert('Favorited! ❤️'); }}>❤️</button>
+              </div>
             </div>
 
           </div>
