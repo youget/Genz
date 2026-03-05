@@ -319,19 +319,49 @@ export default function VibePage() {
         {hasMore && !loading && <div className="load-more-container"><button className="load-more-btn" onClick={handleLoadMore}>⬇️ Load More</button></div>}
       </main>
 
-      {/* VIDEO MODAL (FIXED CONTROLS) */}
+            {/* VIDEO MODAL WITH FLOATING CONTROLS */}
       {selectedVideo && (
         <div className="modal-overlay" onClick={() => setSelectedVideo(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
+            
+            {/* Video Player */}
             <div className="video-player">
-              <iframe src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1`} frameBorder="0" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+              <iframe 
+                src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0&modestbranding=1`} 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen
+                title={selectedVideo.title}
+              ></iframe>
+              
+              {/* FLOATING CONTROLS (Selalu Muncul di Atas Video) */}
+              <div className="modal-controls-floating">
+                <button className="modal-btn-icon share-btn" title="Share" onClick={(e) => {
+                  e.stopPropagation();
+                  alert('Link copied to clipboard! 📋'); // Simulasi share
+                }}>
+                  📤
+                </button>
+                
+                <button className="modal-btn-icon close-btn" title="Close" onClick={() => setSelectedVideo(null)}>
+                  ✕
+                </button>
+                
+                <button className="modal-btn-icon favorite-btn" title="Favorite" onClick={(e) => {
+                  e.stopPropagation();
+                  alert('Added to favorites! ❤️'); // Simulasi fav
+                }}>
+                  ❤️
+                </button>
+              </div>
             </div>
-            {/* Controls Always Visible */}
-            <div className="modal-controls">
-              <button className="modal-btn share-btn">📤 Share</button>
-              <button className="modal-btn close-btn" onClick={() => setSelectedVideo(null)}>✕ Close</button>
-              <button className="modal-btn favorite-btn">❤️ Fav</button>
+
+            {/* Info Video (Opsional, muncul di bawah video tapi di dalam modal) */}
+            <div className="modal-info">
+              <h3 className="modal-video-title">{selectedVideo.title}</h3>
+              <p className="modal-channel-name">{selectedVideo.channel}</p>
             </div>
+
           </div>
         </div>
       )}
